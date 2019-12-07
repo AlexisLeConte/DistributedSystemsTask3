@@ -1,0 +1,31 @@
+INITIALIZER:
+    from Tkinter import *
+    from DWatchGUI import DWatchGUI
+    
+    root = Tk()
+    root.title("A Title")
+    g = DWatchGUI(root, eventhandler)
+    
+    eventhandler.start()
+    root.mainloop()
+    
+    exit() # keep SVM from crashing at exit
+
+STATECHART:
+    A [DS]
+    B
+
+TRANSITION:
+    S: A
+    N: B
+    E: lightOn
+    O: print "A -> B"
+       g.setIndiglo()
+
+TRANSITION:
+    S: B
+    N: A
+    E: lightOff
+    O: print "B -> A"
+       g.unsetIndiglo()
+
