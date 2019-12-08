@@ -31,6 +31,7 @@ class DWatchGUI:
   
   def topLeftPressed(self):
     self.eventhandler.event("changeMode")
+    print "topLeftPressed"
   
   def topLeftReleased(self):
     print "topLeftReleased"
@@ -117,6 +118,16 @@ class DWatchGUI:
 
   def getAlarm(self):
     return self.GUI.getAlarm()
+  
+  def getTimeInSeconds(self):
+    time = self.GUI.getTime()
+    return time[0] * 3600 + time[1] * 60 + time[2]
+  
+  def getDelayInSeconds(self, oldTimeInSeconds, newTimeInSeconds):
+    if oldTimeInSeconds < newTimeInSeconds:
+      return newTimeInSeconds - oldTimeInSeconds
+    else:
+      return newTimeInSeconds + 3600 * 24 - oldTimeInSeconds
      
   #Check if time = alarm set time
   def checkTime(self):

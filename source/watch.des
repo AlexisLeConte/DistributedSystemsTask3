@@ -9,6 +9,9 @@ INITIALIZER:
     root = Tk()
     root.title("A Title")
     g = DWatchGUI(root, eventhandler)
+
+    # global statechart variables
+    time_enter_light_timer = 0
     
     eventhandler.start()
     root.mainloop()
@@ -16,29 +19,45 @@ INITIALIZER:
     exit() # keep SVM from crashing at exit
 
 STATECHART:
-    Running[DS]
-        TimeUnit [CS] [DS] [Time] [IMPORTED=1]
-        DisplayMode [DS] [CS]
-            LightOn
+    DisplayTimeRootClock [DS]
+        DisplayLight [DS][CS]
             LightOff [DS]
-        ChronoMode [CS]
-            Started
-            Stopped
-            Initial [DS]
+            LightOn
+            LightTimer
+        UpdateTime [DS][CS]
+
+# master clock
+TRANSITION:
+    S: DisplayTimeRootClock
+    N: DisplayTimeRootClock
+    T: 1
+    O: [EVENT("clock")]
 
 TRANSITION:
-    S: Running.DisplayMode.LightOff
-    N: Running.DisplayMode.LightOn
+    S: DisplayTimeRootClock.UpdateTime
+    N: DisplayTimeRootClock.UpdateTime
+    E: clock
+    O: g.increaseTimeByOne()
+       g.refreshTimeDisplay()
+
+TRANSITION:
+    S: DisplayTimeRootClock.DisplayLight
+    N: DisplayTimeRootClock.DisplayLight.LightOff
+    E: clock
+    C: g.getDelayInSeconds(time_enter_light_timer, g.getTimeInSeconds()) >= 2
+    O: g.unsetIndiglo()
+
+TRANSITION:
+    S: DisplayTimeRootClock.DisplayLight.LightOff
+    N: DisplayTimeRootClock.DisplayLight.LightOn
     E: lightOn
-    O: print "DisplayMode.LightOff -> DisplayMode.LightOn"
+    O: g.setIndiglo()
 
 TRANSITION:
-    S: Running.DisplayMode.LightOn
-    N: Running.DisplayMode.LightOff
-    T: 2
-    O: print "DisplayMode.LightOn -> DisplayMode.LightOff"
-       g.unsetIndiglo()
+    S: DisplayTimeRootClock.DisplayLight.LightOn
+    N: DisplayTimeRootClock.DisplayLight.LightTimer
+    E: lightOff
 
 ENTER:
-    N: Running.DisplayMode.LightOn
-    O: g.setIndiglo()
+    N: DisplayTimeRootClock.DisplayLight.LightTimer
+    O: time_enter_light_timer = g.getTimeInSeconds()
