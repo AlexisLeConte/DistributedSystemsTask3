@@ -16,16 +16,17 @@ INITIALIZER:
     exit() # keep SVM from crashing at exit
 
 STATECHART:
-    Running[DS]
-        TimeUnit [CS] [DS] [Time] [IMPORTED=1]
-        DisplayMode [DS] [CS]
-            LightOn
+    Clock [CS][DS]
+    Running [CS][DS]
+        TimeUnit [CS][DS] [Time] [IMPORTED=1]
+        DisplayMode [CS][DS]
             LightOff [DS]
+            LightOn
             LightWait
-        ChronoMode [CS]
+        ChronoMode [CS][DS]
+            Initial [DS]
             Started
             Stopped
-            Initial [DS]
 
 TRANSITION:
     S: Running.DisplayMode.LightOff
@@ -45,7 +46,6 @@ TRANSITION:
     T: 2
     O: print "light wait -> light off"
        g.unsetIndiglo()
-
 
 ENTER:
     N: Running.DisplayMode.LightOn

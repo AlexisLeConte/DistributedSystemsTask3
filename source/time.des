@@ -1,16 +1,3 @@
-INITIALIZER:
-    from Tkinter import *
-    from DWatchGUI import DWatchGUI
-    
-    root = Tk()
-    root.title("A Title")
-    g = DWatchGUI(root, eventhandler)
-    
-    eventhandler.start()
-    root.mainloop()
-    
-    exit() # keep SVM from crashing at exit
-
 STATECHART:
     Time [DS]
 
