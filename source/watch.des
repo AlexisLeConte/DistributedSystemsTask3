@@ -1,3 +1,7 @@
+IMPORTATION:
+  # Import the time
+  Time = time.des
+
 INITIALIZER:
     from Tkinter import *
     from DWatchGUI import DWatchGUI
@@ -12,20 +16,29 @@ INITIALIZER:
     exit() # keep SVM from crashing at exit
 
 STATECHART:
-    A [DS]
-    B
+    Running[DS]
+        TimeUnit [CS] [DS] [Time] [IMPORTED=1]
+        DisplayMode [DS] [CS]
+            LightOn
+            LightOff [DS]
+        ChronoMode [CS]
+            Started
+            Stopped
+            Initial [DS]
 
 TRANSITION:
-    S: A
-    N: B
+    S: Running.DisplayMode.LightOff
+    N: Running.DisplayMode.LightOn
     E: lightOn
-    O: print "A -> B"
-       g.setIndiglo()
+    O: print "DisplayMode.LightOff -> DisplayMode.LightOn"
 
 TRANSITION:
-    S: B
-    N: A
-    E: lightOff
-    O: print "B -> A"
+    S: Running.DisplayMode.LightOn
+    N: Running.DisplayMode.LightOff
+    T: 2
+    O: print "DisplayMode.LightOn -> DisplayMode.LightOff"
        g.unsetIndiglo()
 
+ENTER:
+    N: Running.DisplayMode.LightOn
+    O: g.setIndiglo()
