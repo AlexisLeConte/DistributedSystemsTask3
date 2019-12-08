@@ -5,6 +5,9 @@ INITIALIZER:
     root = Tk()
     root.title("A Title")
     g = DWatchGUI(root, eventhandler)
+
+    # global statechart variables
+    time_enter_light_timer = 0
     
     eventhandler.start()
     root.mainloop()
@@ -12,20 +15,45 @@ INITIALIZER:
     exit() # keep SVM from crashing at exit
 
 STATECHART:
-    A [DS]
-    B
+    DisplayTimeRootClock [DS]
+        DisplayLight [DS][CS]
+            LightOff [DS]
+            LightOn
+            LightTimer
+        UpdateTime [DS][CS]
+
+# master clock
+TRANSITION:
+    S: DisplayTimeRootClock
+    N: DisplayTimeRootClock
+    T: 1
+    O: [EVENT("clock")]
 
 TRANSITION:
-    S: A
-    N: B
+    S: DisplayTimeRootClock.UpdateTime
+    N: DisplayTimeRootClock.UpdateTime
+    E: clock
+    O: g.increaseTimeByOne()
+       g.refreshTimeDisplay()
+
+TRANSITION:
+    S: DisplayTimeRootClock.DisplayLight
+    N: DisplayTimeRootClock.DisplayLight.LightOff
+    E: clock
+    C: g.getDelayInSeconds(time_enter_light_timer, g.getTimeInSeconds()) >= 2
+    O: g.unsetIndiglo()
+
+TRANSITION:
+    S: DisplayTimeRootClock.DisplayLight.LightOff
+    N: DisplayTimeRootClock.DisplayLight.LightOn
     E: lightOn
-    O: print "A -> B"
-       g.setIndiglo()
+    O: g.setIndiglo()
 
 TRANSITION:
-    S: B
-    N: A
+    S: DisplayTimeRootClock.DisplayLight.LightOn
+    N: DisplayTimeRootClock.DisplayLight.LightTimer
     E: lightOff
-    O: print "B -> A"
-       g.unsetIndiglo()
 
+ENTER:
+    N: DisplayTimeRootClock.DisplayLight.LightTimer
+    O: time_enter_light_timer = g.getTimeInSeconds()
