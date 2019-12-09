@@ -19,34 +19,57 @@ STATECHART:
     Clock [CS][DS]
     Running [CS][DS]
         TimeUnit [CS][DS] [Time] [IMPORTED=1]
-        DisplayMode [CS][DS]
-            LightOff [DS]
-            LightOn
-            LightWait
-        ChronoMode [CS][DS]
-            Initial [DS]
-            Started
-            Stopped
+        Mode [CS][DS]
+            DisplayMode [DS]
+                update [CS][DS]
+                Light [CS][DS]
+                    LightOff [DS]
+                    LightOn
+                    LightWait
+            ChronoMode
+                Initial [DS]
+                Started
+                Stopped
 
 TRANSITION:
-    S: Running.DisplayMode.LightOff
-    N: Running.DisplayMode.LightOn
+    S: Running.Mode.DisplayMode.Light.LightOff
+    N: Running.Mode.DisplayMode.Light.LightOn
     E: lightOn
     O: print "DisplayMode.LightOff -> DisplayMode.LightOn"
 
 TRANSITION:
-    S: Running.DisplayMode.LightOn
-    N: Running.DisplayMode.LightWait
+    S: Running.Mode.DisplayMode.Light.LightOn
+    N: Running.Mode.DisplayMode.Light.LightWait
     E: lightOff
     O: print "light on -> light wait"
 
 TRANSITION:
-    S: Running.DisplayMode.LightWait
-    N: Running.DisplayMode.LightOff
+    S: Running.Mode.DisplayMode.Light.LightWait
+    N: Running.Mode.DisplayMode.Light.LightOff
     T: 2
     O: print "light wait -> light off"
        g.unsetIndiglo()
 
+
+TRANSITION:
+    S: Running.Mode.DisplayMode
+    N: Running.Mode.ChronoMode
+    E: changeMode
+    O: print "DisplayMode -> ChronoMode"
+       g.refreshChronoDisplay()
+
+TRANSITION:
+    S: Running.Mode.ChronoMode
+    N: Running.Mode.DisplayMode
+    E: changeMode
+    O: print "ChronoMode -> DisplayMode"
+       g.refreshTimeDisplay()
+
+TRANSITION:
+    S: Running.Mode.DisplayMode.update
+    N: Running.Mode.DisplayMode.update
+    T: 1
+    O:  g.refreshTimeDisplay()
 ENTER:
-    N: Running.DisplayMode.LightOn
+    N: Running.Mode.DisplayMode.Light.LightOn
     O: g.setIndiglo()
