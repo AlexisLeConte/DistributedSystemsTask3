@@ -19,33 +19,35 @@ STATECHART:
     Clock [CS][DS]
     Running [CS][DS]
         TimeUnit [CS][DS] [Time] [IMPORTED=1]
+        Light [CS][DS]
+            LightOff [DS]
+            LightOn
+            LightWait
+
         Mode [CS][DS]
             DisplayMode [DS]
                 update [CS][DS]
-                Light [CS][DS]
-                    LightOff [DS]
-                    LightOn
-                    LightWait
+
             ChronoMode
                 Initial [DS]
                 Started
                 Stopped
 
 TRANSITION:
-    S: Running.Mode.DisplayMode.Light.LightOff
-    N: Running.Mode.DisplayMode.Light.LightOn
+    S: Running.Light.LightOff
+    N: Running.Light.LightOn
     E: lightOn
     O: print "DisplayMode.LightOff -> DisplayMode.LightOn"
 
 TRANSITION:
-    S: Running.Mode.DisplayMode.Light.LightOn
-    N: Running.Mode.DisplayMode.Light.LightWait
+    S: Running.Light.LightOn
+    N: Running.Light.LightWait
     E: lightOff
     O: print "light on -> light wait"
 
 TRANSITION:
-    S: Running.Mode.DisplayMode.Light.LightWait
-    N: Running.Mode.DisplayMode.Light.LightOff
+    S: Running.Light.LightWait
+    N: Running.Light.LightOff
     T: 2
     O: print "light wait -> light off"
        g.unsetIndiglo()
@@ -71,5 +73,5 @@ TRANSITION:
     T: 1
     O:  g.refreshTimeDisplay()
 ENTER:
-    N: Running.Mode.DisplayMode.Light.LightOn
+    N: Running.Light.LightOn
     O: g.setIndiglo()
