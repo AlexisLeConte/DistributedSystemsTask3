@@ -1,6 +1,6 @@
 IMPORTATION:
-  # Import the time
-  Time = time.des
+  # Import the system clock (fires tick events every 0.25s)
+  SystemClock = clock.des
 
 INITIALIZER:
     from Tkinter import *
@@ -9,6 +9,8 @@ INITIALIZER:
     root = Tk()
     root.title("A Title")
     g = DWatchGUI(root, eventhandler)
+
+    SystemTicksCount = 0
     
     eventhandler.start()
     root.mainloop()
@@ -16,37 +18,80 @@ INITIALIZER:
     exit() # keep SVM from crashing at exit
 
 STATECHART:
-    Clock [CS][DS]
-    Running [CS][DS]
-        TimeUnit [CS][DS] [Time] [IMPORTED=1]
-        DisplayMode [CS][DS]
-            LightOff [DS]
-            LightOn
-            LightWait
-        ChronoMode [CS][DS]
-            Initial [DS]
-            Started
-            Stopped
+    System [DS]
+        Clock [CS] [DS] [SystemClock] [IMPORTED=1]
+        Watch [CS] [DS]
+            DisplayTime [DS]
+            DisplayChrono
+        Light [CS] [DS]
+            Off [DS]
+            On
+            Waiting
+        Ticks [CS] [DS]
+            Updater [DS]
 
 TRANSITION:
-    S: Running.DisplayMode.LightOff
-    N: Running.DisplayMode.LightOn
+    S: System.Ticks.Updater
+    N: System.Ticks.Updater
+    E: tick
+    O: SystemTicksCount += 1
+
+TRANSITION:
+    S: System.Watch.DisplayTime
+    N: System.Watch.DisplayTime
+    E: tick
+    C: SystemTicksCount%4 == 0
+    O: g.increaseTimeByOne()
+       g.refreshTimeDisplay()
+
+TRANSITION:
+    S: System.Light.Off
+    N: System.Light.On
     E: lightOn
-    O: print "DisplayMode.LightOff -> DisplayMode.LightOn"
+    O: g.setIndiglo()
 
 TRANSITION:
-    S: Running.DisplayMode.LightOn
-    N: Running.DisplayMode.LightWait
+    S: System.Light.On
+    N: System.Light.Waiting
     E: lightOff
-    O: print "light on -> light wait"
+    O: LightTicksCount = 0
 
 TRANSITION:
-    S: Running.DisplayMode.LightWait
-    N: Running.DisplayMode.LightOff
-    T: 2
-    O: print "light wait -> light off"
-       g.unsetIndiglo()
+    S: System.Light.Waiting
+    N: System.Light.Waiting
+    E: tick
+    C: LightTicksCount < 8
+    O: LightTicksCount += 1
+
+TRANSITION:
+    S: System.Light.Waiting
+    N: System.Light.Off
+    E: tick
+    C: LightTicksCount >= 8
+    O: g.unsetIndiglo()
+
+# DEBUG EVENTS
 
 ENTER:
-    N: Running.DisplayMode.LightOn
-    O: g.setIndiglo()
+    N: System.Light.On
+    O: print "Enter System.Light.On"
+
+EXIT:
+    S: System.Light.On
+    O: print "Exit System.Light.On"
+
+ENTER:
+    N: System.Light.Off
+    O: print "Enter System.Light.Off"
+
+EXIT:
+    S: System.Light.Off
+    O: print "Exit System.Light.Off"
+
+ENTER:
+    N: System.Light.Waiting
+    O: print "Enter System.Light.Waiting"
+
+EXIT:
+    S: System.Light.Waiting
+    O: print "Exit System.Light.Waiting"

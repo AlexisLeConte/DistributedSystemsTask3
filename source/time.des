@@ -1,8 +1,0 @@
-STATECHART:
-    Time [DS]
-
-TRANSITION:
-    S: Time
-    N: Time
-    T: 1
-    O: g.increaseTimeByOne()

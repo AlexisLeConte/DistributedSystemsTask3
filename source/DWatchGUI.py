@@ -1,6 +1,7 @@
 from Tkinter import *
 from LowLevelGUI import *
 import time
+import threading
 
 class DWatchGUI:
   def __init__(self, parent, eventhandler):
@@ -26,6 +27,8 @@ class DWatchGUI:
     print "topRightPressed"
 
   def topRightReleased(self):
+    self.eventhandler.event("lightOff")
+    self.eventhandler.event("lightOff")
     self.eventhandler.event("lightOff")
     print "topRightReleased"
   
@@ -77,7 +80,7 @@ class DWatchGUI:
  
   def increaseTimeByOne(self):
     self.GUI.increaseTimeByOne()
-    self.refreshTimeDisplay()    
+    # remove call to refreshTimeDisplay
  
   def resetChrono(self):
     self.GUI.resetChrono()
