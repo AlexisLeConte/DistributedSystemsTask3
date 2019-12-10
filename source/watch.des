@@ -25,6 +25,10 @@ STATECHART:
             DisplayChrono
                 GUITickHandler [DS]
             EditTime
+                Selection [DS]
+                SelectionIncrementWait
+                SelectionExitWait
+            EditAlarm
         Light [CS] [DS]
             Off [DS]
             On
@@ -65,7 +69,7 @@ TRANSITION:
        [EVENT("chronotick")]
 
 ###############################################################################
-# DISPLAY TIME[WAIT] MODE                                                     #
+# DISPLAY TIME [WAIT] MODE                                                    #
 ###############################################################################
 
 ENTER:
@@ -102,7 +106,6 @@ TRANSITION: [0]
     S: System.Mode.DisplayTimeWait
     N: System.Mode.EditTime
     T: 1.5
-    O: print "Enter System.Mode.EditTime"
 
 TRANSITION: [1]
     S: System.Mode.DisplayTimeWait
@@ -139,6 +142,68 @@ TRANSITION:
     S: System.Mode.DisplayChrono
     N: System.Mode.DisplayTime
     E: changeMode
+
+###############################################################################
+# EDIT TIME MODE                                                              #
+###############################################################################
+
+ENTER:
+    N: System.Mode.EditTime
+    O: IsClockRunning = False
+       g.startSelection()
+       g.refreshTimeDisplay()
+
+EXIT:
+    S: System.Mode.EditTime
+    O: IsClockRunning = True
+       g.stopSelection()
+       g.refreshTimeDisplay()
+
+TRANSITION:
+    S: System.Mode.EditTime.Selection
+    N: System.Mode.EditTime.SelectionIncrementWait
+    E: increase
+    O: g.increaseSelection()
+       g.refreshTimeDisplay()
+
+TRANSITION: [1]
+    S: System.Mode.EditTime.SelectionIncrementWait
+    N: System.Mode.EditTime.SelectionIncrementWait
+    T: 0.3
+    O: g.increaseSelection()
+       g.refreshTimeDisplay()
+
+TRANSITION: [0]
+    S: System.Mode.EditTime.SelectionIncrementWait
+    N: System.Mode.EditTime.Selection
+    E: stopInc
+    O: g.refreshTimeDisplay()
+
+TRANSITION:
+    S: System.Mode.EditTime.Selection
+    N: System.Mode.EditTime.Selection
+    E: nextGroup
+    O: g.selectNext()
+
+TRANSITION:
+    S: System.Mode.EditTime.Selection
+    N: System.Mode.DisplayTime
+    T: 5
+
+TRANSITION:
+    S: System.Mode.EditTime.Selection
+    N: System.Mode.EditTime.SelectionExitWait
+    E: finishEdit
+
+TRANSITION:
+    S: System.Mode.EditTime.SelectionExitWait
+    N: System.Mode.DisplayTime
+    T: 2
+
+TRANSITION:
+    S: System.Mode.EditTime.SelectionExitWait
+    N: System.Mode.EditTime.Selection
+    E: released
 
 ###############################################################################
 # BACKGROUND LIGHTS                                                           #

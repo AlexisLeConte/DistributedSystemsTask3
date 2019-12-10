@@ -32,6 +32,7 @@ class DWatchGUI:
   
   def topLeftPressed(self):
     self.eventhandler.event("changeMode")
+    self.eventhandler.event("nextGroup")
     print "topLeftPressed"
   
   def topLeftReleased(self):
@@ -49,7 +50,7 @@ class DWatchGUI:
   def bottomLeftPressed(self):
     self.eventhandler.event("resetChrono")
     self.eventhandler.event("increase")
-    self.eventhandler.event("setAlarm")  
+    self.eventhandler.event("setAlarm")
 
   def bottomLeftReleased(self):
     self.eventhandler.event("stopInc")
