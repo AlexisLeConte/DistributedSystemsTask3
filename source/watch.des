@@ -223,8 +223,8 @@ TRANSITION:
 
 ENTER:
     N: System.Mode.EditAlarm
-    O: g.startSelection()
-       g.refreshAlarmDisplay()
+    O: g.refreshAlarmDisplay()
+       g.startSelection()
 
 EXIT:
     S: System.Mode.EditAlarm
