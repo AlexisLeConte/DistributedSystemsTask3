@@ -16,7 +16,6 @@ INITIALIZER:
     exit() # keep SVM from crashing at exit
 
 STATECHART:
-    Clock [CS][DS]
     Running [CS][DS]
         TimeUnit [CS][DS] [Time] [IMPORTED=1]
         Light [CS][DS]
