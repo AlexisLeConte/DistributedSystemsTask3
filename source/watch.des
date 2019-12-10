@@ -29,10 +29,14 @@ STATECHART:
                 TimeEditWait
                 
             TimeEdit
-                Selection [CS] [DS]
+                Selection [DS] #[CS]
+                    #Increase [DS]
                 TimeEditEndWait [CS] [DS]
+                    Wait[DS]
                 FinishedWait [CS] [DS]
                     FinishedTimer
+                AutoIncrease [CS] [DS]
+                    IncreaseTimer
 
             ChronoMode
                 Initial [DS]
@@ -106,8 +110,11 @@ TRANSITION:
 
 TRANSITION:
     S: Running.Mode.TimeEdit
-    N: Running.Mode.TimeEdit
+    N: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
     E: increase
+
+ENTER:
+    N: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
     O: g.increaseSelection()
 
 TRANSITION:
@@ -127,12 +134,22 @@ TRANSITION:
     E: released
 
 TRANSITION:
-    S: Running.Mode.TimeEdit.TimeEditEndWait
+    S: Running.Mode.TimeEdit.TimeEditEndWait.Wait
     N: Running.Mode.DisplayMode
     T: 5
     O: g.stopSelection();
 
 TRANSITION:
-    S: Running.Mode.TimeEdit.TimeEditEndWait
-    N: Running.Mode.TimeEdit.TimeEditEndWait
+    S: Running.Mode.TimeEdit.TimeEditEndWait.Wait
+    N: Running.Mode.TimeEdit.TimeEditEndWait.Wait
     E: increase
+
+TRANSITION:
+    S: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
+    N: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
+    T: 0.3
+
+TRANSITION:
+    S: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
+    N: Running.Mode.TimeEdit
+    E: stopInc
