@@ -29,6 +29,9 @@ STATECHART:
                 SelectionIncrementWait
                 SelectionExitWait
             EditAlarm
+                Selection [DS]
+                SelectionIncrementWait
+                SelectionExitWait
         Light [CS] [DS]
             Off [DS]
             On
@@ -203,6 +206,66 @@ TRANSITION:
 TRANSITION:
     S: System.Mode.EditTime.SelectionExitWait
     N: System.Mode.EditTime.Selection
+    E: released
+
+###############################################################################
+# EDIT ALARM MODE                                                             #
+###############################################################################
+
+ENTER:
+    N: System.Mode.EditAlarm
+    O: g.startSelection()
+       g.refreshAlarmDisplay()
+
+EXIT:
+    S: System.Mode.EditAlarm
+    O: g.stopSelection()
+       g.refreshTimeDisplay()
+
+TRANSITION:
+    S: System.Mode.EditAlarm.Selection
+    N: System.Mode.EditAlarm.SelectionIncrementWait
+    E: increase
+    O: g.increaseSelection()
+       g.refreshAlarmDisplay()
+
+TRANSITION: [1]
+    S: System.Mode.EditAlarm.SelectionIncrementWait
+    N: System.Mode.EditAlarm.SelectionIncrementWait
+    T: 0.3
+    O: g.increaseSelection()
+       g.refreshAlarmDisplay()
+
+TRANSITION: [0]
+    S: System.Mode.EditAlarm.SelectionIncrementWait
+    N: System.Mode.EditAlarm.Selection
+    E: stopInc
+    O: g.refreshAlarmDisplay()
+
+TRANSITION:
+    S: System.Mode.EditAlarm.Selection
+    N: System.Mode.EditAlarm.Selection
+    E: nextGroup
+    O: g.selectNext()
+
+TRANSITION:
+    S: System.Mode.EditAlarm.Selection
+    N: System.Mode.DisplayTime
+    T: 5
+
+TRANSITION:
+    S: System.Mode.EditAlarm.Selection
+    N: System.Mode.EditAlarm.SelectionExitWait
+    E: finishEdit
+
+TRANSITION:
+    S: System.Mode.EditAlarm.SelectionExitWait
+    N: System.Mode.DisplayTime
+    T: 2
+
+TRANSITION:
+    S: System.Mode.EditAlarm.SelectionExitWait
+    N: System.Mode.EditAlarm.Selection
     E: released
 
 ###############################################################################
