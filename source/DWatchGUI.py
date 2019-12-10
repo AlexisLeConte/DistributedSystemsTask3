@@ -28,8 +28,6 @@ class DWatchGUI:
 
   def topRightReleased(self):
     self.eventhandler.event("lightOff")
-    self.eventhandler.event("lightOff")
-    self.eventhandler.event("lightOff")
     print "topRightReleased"
   
   def topLeftPressed(self):
