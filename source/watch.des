@@ -27,10 +27,19 @@ STATECHART:
             DisplayMode [DS]
                 update [CS][DS]
                 TimeEditWait
+                AlarmEditWait
+                Alarm
+
+            AlarmEdit
+                TimeEditEndWait [CS] [DS]
+                    Wait[DS]
+                FinishedWait [CS] [DS]
+                    FinishedTimer
+                AutoIncrease [CS] [DS]
+                    IncreaseTimer
+
                 
             TimeEdit
-                Selection [DS] #[CS]
-                    #Increase [DS]
                 TimeEditEndWait [CS] [DS]
                     Wait[DS]
                 FinishedWait [CS] [DS]
@@ -90,7 +99,7 @@ ENTER:
     N: Running.Light.LightOn
     O: g.setIndiglo()
 
-# time edit mode and timers for selection 
+# swith to time edit mode
 
 TRANSITION:
     S: Running.Mode.DisplayMode
@@ -108,6 +117,8 @@ TRANSITION:
     N: Running.Mode.DisplayMode
     E: released
 
+# time edit mode
+
 TRANSITION:
     S: Running.Mode.TimeEdit
     N: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
@@ -116,6 +127,18 @@ TRANSITION:
 ENTER:
     N: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
     O: g.increaseSelection()
+
+TRANSITION:
+    S: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
+    N: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
+    T: 0.3
+
+TRANSITION:
+    S: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
+    N: Running.Mode.TimeEdit
+    E: stopInc
+
+# end time editing
 
 TRANSITION:
     S: Running.Mode.TimeEdit
@@ -144,12 +167,78 @@ TRANSITION:
     N: Running.Mode.TimeEdit.TimeEditEndWait.Wait
     E: increase
 
+# alarm functionality
+
+#TRANSITION:
+#    S: Running.Mode.DisplayMode
+#    N: Running.Mode.DisplayMode
+#    E: setAlarm
+#    O: g.setAlarm()
+
 TRANSITION:
-    S: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
-    N: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
+    S: Running.Mode.DisplayMode
+    N: Running.Mode.DisplayMode.AlarmEditWait
+    E: setAlarm
+    #O: print "test"
+
+TRANSITION:
+    S: Running.Mode.DisplayMode.AlarmEditWait
+    N: Running.Mode.AlarmEdit
+    T: 1.5
+    O: g.refreshAlarmDisplay(); g.startSelection()
+
+TRANSITION:
+    S: Running.Mode.DisplayMode.AlarmEditWait
+    N: Running.Mode.DisplayMode
+    E: onoff
+
+ENTER:
+    N: Running.Mode.DisplayMode.AlarmEditWait
+    O: g.setAlarm()
+
+TRANSITION:
+    S: Running.Mode.AlarmEdit
+    N: Running.Mode.AlarmEdit.AutoIncrease.IncreaseTimer
+    E: increase
+
+ENTER:
+    N: Running.Mode.AlarmEdit.AutoIncrease.IncreaseTimer
+    O: g.increaseSelection()
+
+TRANSITION:
+    S: Running.Mode.AlarmEdit.AutoIncrease.IncreaseTimer
+    N: Running.Mode.AlarmEdit.AutoIncrease.IncreaseTimer
     T: 0.3
 
 TRANSITION:
-    S: Running.Mode.TimeEdit.AutoIncrease.IncreaseTimer
-    N: Running.Mode.TimeEdit
+    S: Running.Mode.AlarmEdit.AutoIncrease.IncreaseTimer
+    N: Running.Mode.AlarmEdit
     E: stopInc
+
+
+TRANSITION:
+    S: Running.Mode.AlarmEdit
+    N: Running.Mode.AlarmEdit.FinishedWait.FinishedTimer
+    E: finishEdit
+
+TRANSITION:
+    S: Running.Mode.AlarmEdit.FinishedWait.FinishedTimer
+    N: Running.Mode.DisplayMode
+    T: 2
+    O: g.stopSelection();
+
+TRANSITION:
+    S: Running.Mode.AlarmEdit.FinishedWait.FinishedTimer
+    N: Running.Mode.AlarmEdit
+    E: released
+
+TRANSITION:
+    S: Running.Mode.AlarmEdit.TimeEditEndWait.Wait
+    N: Running.Mode.DisplayMode
+    T: 5
+    O: g.stopSelection();
+
+TRANSITION:
+    S: Running.Mode.AlarmEdit.TimeEditEndWait.Wait
+    N: Running.Mode.AlarmEdit.TimeEditEndWait.Wait
+    E: increase
