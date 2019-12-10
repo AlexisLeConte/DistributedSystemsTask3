@@ -1,8 +1,0 @@
-STATECHART:
-    Clock [DS]
-
-TRANSITION:
-    S: Clock
-    N: Clock
-    T: 0.25
-    O: [EVENT("tick")]
