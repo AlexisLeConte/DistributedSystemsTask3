@@ -1,7 +1,3 @@
-#IMPORTATION:
-  # Import the system clock (fires tick events every 0.25s)
-  #SystemClock = clock.des
-
 INITIALIZER:
     from Tkinter import *
     from DWatchGUI import DWatchGUI
@@ -9,8 +5,6 @@ INITIALIZER:
     root = Tk()
     root.title("A Title")
     g = DWatchGUI(root, eventhandler)
-
-    SystemTicksCount = 0
     
     eventhandler.start()
     root.mainloop()
@@ -28,6 +22,16 @@ STATECHART:
             Off [DS]
             On
             Waiting
+
+
+###############################################################################
+# INITIALIZATION                                                              #
+###############################################################################
+
+ENTER:
+    N: System
+    O: SystemTicksCount = 0
+       g.resetChrono()
 
 ###############################################################################
 # SYSTEM CLOCK                                                                #
@@ -52,6 +56,36 @@ TRANSITION:
     O: g.increaseTimeByOne()
        g.refreshTimeDisplay()
 
+TRANSITION:
+    S: System.Watch.DisplayTime
+    N: System.Watch.DisplayChrono
+    E: changeMode
+
+###############################################################################
+# DISPLAY CHRONO MODE                                                         #
+###############################################################################
+
+TRANSITION: [0]
+    S: System.Watch.DisplayChrono
+    N: System.Watch.DisplayChrono
+    E: tick
+    C: SystemTicksCount%4 == 0
+    O: g.increaseTimeByOne()
+       g.increaseChronoByOne()
+       g.refreshChronoDisplay()
+
+TRANSITION: [1]
+    S: System.Watch.DisplayChrono
+    N: System.Watch.DisplayChrono
+    E: tick
+    O: g.increaseChronoByOne()
+       g.refreshChronoDisplay()
+
+TRANSITION:
+    S: System.Watch.DisplayChrono
+    N: System.Watch.DisplayTime
+    E: changeMode
+
 ###############################################################################
 # BACKGROUND LIGHTS                                                           #
 ###############################################################################
@@ -70,16 +104,8 @@ TRANSITION:
 
 TRANSITION:
     S: System.Light.Waiting
-    N: System.Light.Waiting
-    E: tick
-    C: LightTicksCount < 8
-    O: LightTicksCount += 1
-
-TRANSITION:
-    S: System.Light.Waiting
     N: System.Light.Off
-    E: tick
-    C: LightTicksCount >= 8
+    T: 2
     O: g.unsetIndiglo()
 
 ###############################################################################
