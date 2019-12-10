@@ -39,6 +39,10 @@ STATECHART:
             Off [DS]
             On
             Waiting
+        Alarm [CS] [DS]
+            Checking [DS]
+            BlinkingOn
+            BlinkingOff
 
 ###############################################################################
 # INITIALIZATION                                                              #
@@ -48,6 +52,7 @@ ENTER:
     N: System
     O: IsClockRunning = True
        IsChronoRunning = False
+       IsAlarmSet = False
        g.resetChrono()
 
 ###############################################################################
@@ -113,6 +118,7 @@ TRANSITION:
     N: System.Mode.DisplayTime.Mode.DisplayEditAlarmWait
     E: setAlarm
     O: g.setAlarm()
+       IsAlarmSet = not IsAlarmSet
 
 TRANSITION: [0]
     S: System.Mode.DisplayTime.Mode.DisplayEditAlarmWait
@@ -297,4 +303,36 @@ TRANSITION:
     S: System.Light.Waiting
     N: System.Light.Off
     T: 2
+    O: g.unsetIndiglo()
+
+###############################################################################
+# ALARM                                                                       #
+###############################################################################
+
+TRANSITION:
+    S: System.Alarm.Checking
+    N: System.Alarm.BlinkingOn
+    E: clocktick
+    C: IsAlarmSet and g.checkTime()
+    O: BlinkCount = 0
+
+TRANSITION:
+    S: System.Alarm.BlinkingOn
+    N: System.Alarm.BlinkingOff
+    T: 0.5
+    C: BlinkCount < 4
+    O: BlinkCount += 1
+       g.setIndiglo()
+
+TRANSITION:
+    S: System.Alarm.BlinkingOn
+    N: System.Alarm.Checking
+    T: 0.5
+    C: BlinkCount == 4
+    O: g.unsetIndiglo()
+
+TRANSITION:
+    S: System.Alarm.BlinkingOff
+    N: System.Alarm.BlinkingOn
+    T: 0.5
     O: g.unsetIndiglo()

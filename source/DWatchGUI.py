@@ -115,7 +115,7 @@ class DWatchGUI:
   def setAlarm(self):
     self.GUI.setAlarm()
 
-  # Query 
+  # Query
   def getTime(self):
     return self.GUI.getTime()
 
