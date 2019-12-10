@@ -9,19 +9,21 @@ INITIALIZER:
     root = Tk()
     root.title("A Title")
     g = DWatchGUI(root, eventhandler)
-    
+    test = 1
+
     eventhandler.start()
     root.mainloop()
     
     exit() # keep SVM from crashing at exit
 
 STATECHART:
-    Clock [CS][DS]
-    Running [CS][DS]
+    Clock [DS]
+    Running [DS]
         TimeUnit [CS][DS] [Time] [IMPORTED=1]
-        ChronoTime [CS][DS]
+        ChronoTime [CS]
             stop [DS]
             start
+                running [DS]
 
         Light [CS][DS]
             LightOff [DS]
@@ -34,8 +36,8 @@ STATECHART:
 
             ChronoMode
                 update [CS][DS]
-                Initial [DS]
-                Started
+                Initial [CS][DS]
+                Started [CS]
                 Stopped
 
 TRANSITION:
@@ -78,17 +80,21 @@ TRANSITION:
     T: 1
     O:  g.refreshTimeDisplay()
 
-TRANSITION:
-    S: Running.Mode.ChronoMode.Initial
-    N: Running.ChronoTime.start
-    E: initChrono
-    O: print "Chrono start"
 
 TRANSITION:
     S: Running.Mode.ChronoMode.Initial
     N: Running.Mode.ChronoMode.Started
     E: initChrono
-    O: print "Chrono start 2"
+    O: print "init to start"
+       test = 0
+
+
+TRANSITION:
+    S: Running.Mode.ChronoMode.Started
+    N: Running.Mode.ChronoMode.Stopped
+    E: initChrono
+    O: print "start to stop"
+       test = 1
 
 TRANSITION:
     S: Running.Mode.ChronoMode.update
@@ -96,11 +102,25 @@ TRANSITION:
     T: 1
     O: g.refreshChronoDisplay()
 
+
 TRANSITION:
-    S: Running.ChronoTime.start
+    S: Running.ChronoTime.stop
     N: Running.ChronoTime.start
+    C: test == 0
+    E: initChrono
+
+TRANSITION:
+    S: Running.ChronoTime.start.running
+    N: Running.ChronoTime.start.running
     T: 1
     O: g.increaseChronoByOne()
+
+TRANSITION:
+    S: Running.ChronoTime.start
+    N: Running.ChronoTime.stop
+    C: test == 1
+    E: initChrono
+
 
 ENTER:
     N: Running.Light.LightOn
