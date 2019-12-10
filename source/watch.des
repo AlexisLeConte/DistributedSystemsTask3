@@ -20,7 +20,7 @@ STATECHART:
     Clock [DS]
     Running [DS]
         TimeUnit [CS][DS] [Time] [IMPORTED=1]
-        ChronoTime [CS]
+        ChronoTime [CS][DS]
             stop [DS]
             start
                 running [DS]
@@ -36,9 +36,9 @@ STATECHART:
 
             ChronoMode
                 update [CS][DS]
+                Stopped [CS][DS]
                 Started [CS]
-                Stopped [DS][CS]
-                Reset
+
 
 #######################################################
 #               LIGHT                                 #
@@ -110,31 +110,50 @@ TRANSITION:
     S: Running.Mode.ChronoMode.Started
     N: Running.Mode.ChronoMode.Stopped
     E: initChrono
-    O: print "init to start"
+    O: print "init to stop"
       [EVENT("stop")]
+
+
+TRANSITION:
+    S: Running.Mode.ChronoMode.Started
+    N: Running.Mode.ChronoMode.Stopped
+    E: resetChrono
+    O: print "init to start"
+      [EVENT("reset")]
+
+TRANSITION:
+    S: Running.Mode.ChronoMode.Stopped
+    N: Running.Mode.ChronoMode.Stopped
+    E: resetChrono
+    O: print "init to start"
+      [EVENT("reset")]
 
 TRANSITION:
     S: Running.ChronoTime.stop
     N: Running.ChronoTime.start
     E: start
 
+
+TRANSITION:
+    S: Running.ChronoTime.start.running
+    N: Running.ChronoTime.start.running
+    T: 1
+    O: g.increaseChronoByOne()
+       print "trigggered like a femi"
+
 TRANSITION:
     S: Running.ChronoTime.start
     N: Running.ChronoTime.stop
-    E: start
+    E: reset
+    O: g.resetChrono()
+       print "reset"
 
 TRANSITION:
-    S: Running.ChronoTime.start.running
-    N: Running.ChronoTime.start.running
-    T: 1
-    O: g.increaseChronoByOne()
-
-TRANSACTION
-    S: Running.ChronoTime.start.running
-    N: Running.ChronoTime.start.running
-    T: 1
-    O: g.increaseChronoByOne()
-
+    S: Running.ChronoTime.stop
+    N: Running.ChronoTime.stop
+    E: reset
+    O: g.resetChrono()
+       print "reset"
 
 
 
