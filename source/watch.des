@@ -27,6 +27,9 @@ STATECHART:
         Mode [CS][DS]
             DisplayMode [DS]
                 update [CS][DS]
+                TimeEditWait
+                
+            TimeEdit
 
             ChronoMode
                 Initial [DS]
@@ -75,3 +78,20 @@ TRANSITION:
 ENTER:
     N: Running.Light.LightOn
     O: g.setIndiglo()
+
+TRANSITION:
+    S: Running.Mode.DisplayMode
+    N: Running.Mode.DisplayMode.TimeEditWait
+    E: editTime
+
+TRANSITION:
+    S: Running.Mode.DisplayMode.TimeEditWait
+    N: Running.Mode.TimeEdit
+    T: 1.5
+    O: g.startSelection()
+
+TRANSITION:
+    S: Running.Mode.TimeEdit
+    N: Running.Mode.TimeEdit
+    E: increase
+    O: g.increaseSelection()
