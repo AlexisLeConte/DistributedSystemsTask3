@@ -36,10 +36,13 @@ STATECHART:
 
             ChronoMode
                 update [CS][DS]
-                Initial [CS][DS]
                 Started [CS]
-                Stopped
+                Stopped [DS][CS]
+                Reset
 
+#######################################################
+#               LIGHT                                 #
+#######################################################
 TRANSITION:
     S: Running.Light.LightOff
     N: Running.Light.LightOn
@@ -59,6 +62,9 @@ TRANSITION:
     O: print "light wait -> light off"
        g.unsetIndiglo()
 
+#######################################################
+#               DisplayMode                           #
+#######################################################
 
 TRANSITION:
     S: Running.Mode.DisplayMode
@@ -74,27 +80,15 @@ TRANSITION:
     O: print "ChronoMode -> DisplayMode"
        g.refreshTimeDisplay()
 
+#######################################################
+#               updateDisplays                        #
+#######################################################
+
 TRANSITION:
     S: Running.Mode.DisplayMode.update
     N: Running.Mode.DisplayMode.update
     T: 1
     O:  g.refreshTimeDisplay()
-
-
-TRANSITION:
-    S: Running.Mode.ChronoMode.Initial
-    N: Running.Mode.ChronoMode.Started
-    E: initChrono
-    O: print "init to start"
-       test = 0
-
-
-TRANSITION:
-    S: Running.Mode.ChronoMode.Started
-    N: Running.Mode.ChronoMode.Stopped
-    E: initChrono
-    O: print "start to stop"
-       test = 1
 
 TRANSITION:
     S: Running.Mode.ChronoMode.update
@@ -102,12 +96,32 @@ TRANSITION:
     T: 1
     O: g.refreshChronoDisplay()
 
+#######################################################
+#               CronoMode                             #
+#######################################################
+TRANSITION:
+    S: Running.Mode.ChronoMode.Stopped
+    N: Running.Mode.ChronoMode.Started
+    E: initChrono
+    O: print "init to start"
+      [EVENT("start")]
+
+TRANSITION:
+    S: Running.Mode.ChronoMode.Started
+    N: Running.Mode.ChronoMode.Stopped
+    E: initChrono
+    O: print "init to start"
+      [EVENT("stop")]
 
 TRANSITION:
     S: Running.ChronoTime.stop
     N: Running.ChronoTime.start
-    C: test == 0
-    E: initChrono
+    E: start
+
+TRANSITION:
+    S: Running.ChronoTime.start
+    N: Running.ChronoTime.stop
+    E: start
 
 TRANSITION:
     S: Running.ChronoTime.start.running
@@ -115,11 +129,14 @@ TRANSITION:
     T: 1
     O: g.increaseChronoByOne()
 
-TRANSITION:
-    S: Running.ChronoTime.start
-    N: Running.ChronoTime.stop
-    C: test == 1
-    E: initChrono
+TRANSACTION
+    S: Running.ChronoTime.start.running
+    N: Running.ChronoTime.start.running
+    T: 1
+    O: g.increaseChronoByOne()
+
+
+
 
 
 ENTER:
