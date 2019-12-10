@@ -19,6 +19,10 @@ STATECHART:
     Clock [CS][DS]
     Running [CS][DS]
         TimeUnit [CS][DS] [Time] [IMPORTED=1]
+        ChronoTime [CS][DS]
+            stop [DS]
+            start
+
         Light [CS][DS]
             LightOff [DS]
             LightOn
@@ -29,6 +33,7 @@ STATECHART:
                 update [CS][DS]
 
             ChronoMode
+                update [CS][DS]
                 Initial [DS]
                 Started
                 Stopped
@@ -72,6 +77,31 @@ TRANSITION:
     N: Running.Mode.DisplayMode.update
     T: 1
     O:  g.refreshTimeDisplay()
+
+TRANSITION:
+    S: Running.Mode.ChronoMode.Initial
+    N: Running.ChronoTime.start
+    E: initChrono
+    O: print "Chrono start"
+
+TRANSITION:
+    S: Running.Mode.ChronoMode.Initial
+    N: Running.Mode.ChronoMode.Started
+    E: initChrono
+    O: print "Chrono start 2"
+
+TRANSITION:
+    S: Running.Mode.ChronoMode.update
+    N: Running.Mode.ChronoMode.update
+    T: 1
+    O: g.refreshChronoDisplay()
+
+TRANSITION:
+    S: Running.ChronoTime.start
+    N: Running.ChronoTime.start
+    T: 1
+    O: g.increaseChronoByOne()
+
 ENTER:
     N: Running.Light.LightOn
     O: g.setIndiglo()
