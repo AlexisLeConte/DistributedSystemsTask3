@@ -19,9 +19,12 @@ STATECHART:
             Ticker [DS]
         Mode [CS] [DS]
             DisplayTime [DS]
-                GUITickHandler [DS]
-            DisplayTimeWait
-                GUITickHandler [DS]
+                GUIUpdater [CS] [DS]
+                    GUITickHandler [DS]
+                Mode [CS] [DS]
+                    Display [DS]
+                    DisplayEditTimeWait
+                    DisplayEditAlarmWait
             DisplayChrono
                 GUITickHandler [DS]
             EditTime
@@ -72,26 +75,16 @@ TRANSITION:
        [EVENT("chronotick")]
 
 ###############################################################################
-# DISPLAY TIME [WAIT] MODE                                                    #
+# DISPLAY TIME MODE                                                           #
 ###############################################################################
 
 ENTER:
     N: System.Mode.DisplayTime
     O: g.refreshTimeDisplay()
 
-ENTER:
-    N: System.Mode.DisplayTimeWait
-    O: g.refreshTimeDisplay()
-
 TRANSITION:
-    S: System.Mode.DisplayTime.GUITickHandler
-    N: System.Mode.DisplayTime.GUITickHandler
-    E: clocktick
-    O: g.refreshTimeDisplay()
-
-TRANSITION:
-    S: System.Mode.DisplayTimeWait.GUITickHandler
-    N: System.Mode.DisplayTimeWait.GUITickHandler
+    S: System.Mode.DisplayTime.GUIUpdater.GUITickHandler
+    N: System.Mode.DisplayTime.GUIUpdater.GUITickHandler
     E: clocktick
     O: g.refreshTimeDisplay()
 
@@ -101,19 +94,35 @@ TRANSITION:
     E: changeMode
 
 TRANSITION:
-    S: System.Mode.DisplayTime
-    N: System.Mode.DisplayTimeWait
+    S: System.Mode.DisplayTime.Mode.Display
+    N: System.Mode.DisplayTime.Mode.DisplayEditTimeWait
     E: editTime
 
 TRANSITION: [0]
-    S: System.Mode.DisplayTimeWait
+    S: System.Mode.DisplayTime.Mode.DisplayEditTimeWait
     N: System.Mode.EditTime
     T: 1.5
 
 TRANSITION: [1]
-    S: System.Mode.DisplayTimeWait
-    N: System.Mode.DisplayTime
+    S: System.Mode.DisplayTime.Mode.DisplayEditTimeWait
+    N: System.Mode.DisplayTime.Mode.Display
     E: released
+
+TRANSITION:
+    S: System.Mode.DisplayTime.Mode.Display
+    N: System.Mode.DisplayTime.Mode.DisplayEditAlarmWait
+    E: setAlarm
+    O: g.setAlarm()
+
+TRANSITION: [0]
+    S: System.Mode.DisplayTime.Mode.DisplayEditAlarmWait
+    N: System.Mode.EditAlarm
+    T: 1.5
+
+TRANSITION: [1]
+    S: System.Mode.DisplayTime.Mode.DisplayEditAlarmWait
+    N: System.Mode.DisplayTime.Mode.Display
+    E: onoff
 
 ###############################################################################
 # DISPLAY CHRONO MODE                                                         #
