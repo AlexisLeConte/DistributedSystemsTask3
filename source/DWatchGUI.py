@@ -43,6 +43,7 @@ class DWatchGUI:
     self.eventhandler.event("initChrono")
     self.eventhandler.event("editTime")
     self.eventhandler.event("finishEdit")
+    print "bottomRightPressed"
 
   def bottomRightReleased(self):
     self.eventhandler.event("released")
