@@ -30,11 +30,17 @@ STATECHART:
                 TimeEditWait
                 
             TimeEdit
+                Selection [CS] [DS]
+                TimeEditEndWait [CS] [DS]
+                FinishedWait [CS] [DS]
+                    FinishedTimer
 
             ChronoMode
                 Initial [DS]
                 Started
                 Stopped
+
+# Light on and off
 
 TRANSITION:
     S: Running.Light.LightOff
@@ -55,6 +61,7 @@ TRANSITION:
     O: print "light wait -> light off"
        g.unsetIndiglo()
 
+# switch between display and chrono mode
 
 TRANSITION:
     S: Running.Mode.DisplayMode
@@ -75,9 +82,12 @@ TRANSITION:
     N: Running.Mode.DisplayMode.update
     T: 1
     O:  g.refreshTimeDisplay()
+
 ENTER:
     N: Running.Light.LightOn
     O: g.setIndiglo()
+
+# time edit mode and timers for selection 
 
 TRANSITION:
     S: Running.Mode.DisplayMode
@@ -91,7 +101,39 @@ TRANSITION:
     O: g.startSelection()
 
 TRANSITION:
+    S: Running.Mode.DisplayMode.TimeEditWait
+    N: Running.Mode.DisplayMode
+    E: released
+
+TRANSITION:
     S: Running.Mode.TimeEdit
     N: Running.Mode.TimeEdit
     E: increase
     O: g.increaseSelection()
+
+TRANSITION:
+    S: Running.Mode.TimeEdit
+    N: Running.Mode.TimeEdit.FinishedWait.FinishedTimer
+    E: finishEdit
+
+TRANSITION:
+    S: Running.Mode.TimeEdit.FinishedWait.FinishedTimer
+    N: Running.Mode.DisplayMode
+    T: 2
+    O: g.stopSelection();
+
+TRANSITION:
+    S: Running.Mode.TimeEdit.FinishedWait.FinishedTimer
+    N: Running.Mode.TimeEdit
+    E: released
+
+TRANSITION:
+    S: Running.Mode.TimeEdit.TimeEditEndWait
+    N: Running.Mode.DisplayMode
+    T: 5
+    O: g.stopSelection();
+
+TRANSITION:
+    S: Running.Mode.TimeEdit.TimeEditEndWait
+    N: Running.Mode.TimeEdit.TimeEditEndWait
+    E: increase
