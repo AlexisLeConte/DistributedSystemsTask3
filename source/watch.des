@@ -1,6 +1,6 @@
-IMPORTATION:
+#IMPORTATION:
   # Import the system clock (fires tick events every 0.25s)
-  SystemClock = clock.des
+  #SystemClock = clock.des
 
 INITIALIZER:
     from Tkinter import *
@@ -19,7 +19,8 @@ INITIALIZER:
 
 STATECHART:
     System [DS]
-        Clock [CS] [DS] [SystemClock] [IMPORTED=1]
+        Clock [CS] [DS]
+            Ticker [DS]
         Watch [CS] [DS]
             DisplayTime [DS]
             DisplayChrono
@@ -27,14 +28,13 @@ STATECHART:
             Off [DS]
             On
             Waiting
-        Ticks [CS] [DS]
-            Updater [DS]
 
 TRANSITION:
-    S: System.Ticks.Updater
-    N: System.Ticks.Updater
-    E: tick
-    O: SystemTicksCount += 1
+    S: System.Clock.Ticker
+    N: System.Clock.Ticker
+    T: 0.25
+    O: [EVENT("tick")]
+       SystemTicksCount += 1
 
 TRANSITION:
     S: System.Watch.DisplayTime
@@ -43,6 +43,10 @@ TRANSITION:
     C: SystemTicksCount%4 == 0
     O: g.increaseTimeByOne()
        g.refreshTimeDisplay()
+
+###############################################################################
+# BACKGROUND LIGHTS
+###############################################################################
 
 TRANSITION:
     S: System.Light.Off
